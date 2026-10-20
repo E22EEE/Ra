@@ -1,0 +1,24 @@
+name: Build RayxCloud iOS
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate --spec project.yml --project RayxCloudBuild --project-root .
+
+      - name: Resolve packages
+        run: xcodebuild -resolvePackageDependencies -project RayxCloudBuild/RayxCloud.xcodeproj -scheme RayxCloud
+
+      - name: Build iOS app
+        run: xcodebuild -project RayxCloudBuild/RayxCloud.xcodeproj -scheme RayxCloud -sdk iphoneos -configuration Release CODE_SIGNING_ALLOWED=NO build
